@@ -1,0 +1,151 @@
+KATHARA PDF2
+
+
+lab.conf:
+1- pc1[0]=“A/00:00:00:00:00:01”
+pc1 has one interface(“eth0”) connected on collision domain A.Its MAC address is set to  00:00:00:00:00:01
+
+
+2- pc1[image]="kathara/base"
+pc1 will use image"kathara/base"
+
+3- pc1[ipv6]="false"
+ipv6 networking is disabled
+
+
+-----------------------------------------------
+4-
+Gestione degli indirizzi MAC in un laboratorio Kathará
+
+Specifica degli indirizzi MAC:
+Gli indirizzi MAC delle interfacce possono essere definiti direttamente nel file lab.conf.
+Se non specificati, Kathará assegna indirizzi MAC casuali alle interfacce di rete.
+
+Problemi con gli indirizzi casuali:
+Gli indirizzi MAC generati casualmente possono essere difficili da ricordare.
+Modifica degli indirizzi MAC:
+È possibile cambiare gli indirizzi MAC assegnati anche dopo che un dispositivo è in esecuzione.
+
+
+5-
+the MAC address can be changed with command
+ *root@pc1:~$ ip link set dev eth0 address 00:00:00:00:00:01
+ 
+from iproute2
+operate at Layer 2
+the device to be set = eth0
+what needs to be set: the layer 2 ddress (e.g., the MAC address)
+the new MAC address
+
+
+----------------------------------
+two computers on the same LAN; can
+communicate?
+
+
+6-
+Per inviare frame Ethernet su una LAN è necessario solo il MAC di destinazione. Linux non ha strumenti predefiniti per farlo, ma si può usare la libreria Python Scapy per creare e inviare pacchetti personalizzati.
+
+7-
+I comandi eseguiti nella console possono essere inseriti nel file .startup del dispositivo corrispondente.
+I comandi .startup vengono eseguiti all'avvio del dispositivo.
+In questo laboratorio non è necessario, poiché gli indirizzi MAC sono già definiti nel file lab.conf, e le interfacce vengono create con i MAC assegnati.
+
+
+8-
+Esempio di laboratorio con MAC address definiti nei file .startup
+
+Differenza principale:
+Le interfacce vengono create inizialmente con indirizzi MAC casuali.
+Successivamente, gli indirizzi MAC vengono modificati tramite i comandi presenti nei file .startup.
+Esempio di comando in .startup:
+
+ip link set dev eth0 address 00:00:00:00:00:02
+
+***Risultato:
+ Gli indirizzi MAC definitivi vengono applicati al momento dell'avvio dei dispositivi, anziché essere preconfigurati nel file lab.conf.
+ 
+
+9-
+Scapy: Strumento Python per manipolare pacchetti di rete
+
+Versatilità: Scapy è uno strumento Python potente per creare, analizzare e sniffare pacchetti di rete, supportando numerosi protocolli.
+Caratteristiche principali:
+Include una shell interattiva per manipolazioni in tempo reale della rete.
+Consente di creare pacchetti personalizzati con valori specifici per ogni campo.
+
+
+10
+>>> scapy
+>>> exit() -->to quit the scapy shell use command
+>>> p=Ether(dst='00:00:00:00:00:0B', src='00:00:00:00:00:0A')
+
+	-->save this packet into a variable p,create a new instance of the Ether class
+	(used to craft Ethernet frames)
+	-->Salva questo pacchetto in una variabile p, crea una nuova istanza della 
+	 classe Ether(usata per creare frame Ethernet).
+
+>>> sendp(p, iface='eth0')  -->to send a layer 2 frame, use command--
+			    -->the network interface through which the packet will be sent
+
+
+11
+
+Un packet sniffer (o network analyzer) è uno strumento che cattura il traffico di rete mentre transita su un segmento di rete.
+Funzione: Permette di visualizzare il contenuto dei pacchetti trasmessi o ricevuti.
+Utilizzi principali:
+Diagnostica di rete.
+Analisi delle prestazioni.
+Sicurezza informatica: rilevamento di vulnerabilità o attività malevole.
+
+
+12-
+Wireshark: Analizzatore di pacchetti
+
+Descrizione: Strumento open-source molto usato per analizzare pacchetti di rete in tempo reale.
+Funzionalità:
+Cattura e mostra i dati in transito da e verso i dispositivi di rete.
+Offre strumenti avanzati di filtraggio e analisi.
+Utilizzi principali:
+Risoluzione di problemi di rete.
+sviluppo di protocolli.
+Investigazioni in ambito di sicurezza informatica.
+
+13-
+wireshark[bridged]=true  --->connect a device  called wireshark to the host network
+wireshark[port]="3000:3000" -->map port 3000 of the host to port 3000 of the guest
+wireshark[image]="lscr.io/linuxserver/wireshark"  -->use a dedicated image
+wireshark[num_terms]=0  -->do not open any terminals
+
+
+14-
+◼ after the lab.conf is changed, the lab needs to be
+restarted in order to apply the new configuration
+
+*** user@localhost:kathara-lab_two-computers$     kathara lrestart
+
+15- open Wireshark
+
+http://localhost:3000
+
+16-
+to connect the wireshark device to the collision domain to be sniffed, use this command
+
+*** user@localhost:kathara-lab_two-computers$   kathara lconfig –n wireshark --add A
+
+manage the network interfaces of a running lab
+specify the name (n) of the device to modify
+add a network interface
+connected to collision domain A
+
+17-
+quando due dispositivi sono connessi tra di loro ad un dominio di collisione ad ognuno (sia dispositivi che dominio di collisione) avranno la loro intrerfaccia di rete
+
+18-
+reload the wireshark web page
+open the eth1 interface by double clicking on it
+ send a new packet with scapy 
+ a wild packet appeared
+
+
+

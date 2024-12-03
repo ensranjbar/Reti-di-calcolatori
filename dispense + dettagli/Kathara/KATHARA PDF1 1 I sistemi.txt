@@ -1,0 +1,182 @@
+KATHARA- PDF1 
+
+teoria
+1-
+I sistemi di simulazione riproducono le prestazioni di un sistema reale (es. latenza, perdita di pacchetti).
+2-
+I sistemi di emulazione replicano accuratamente le funzionalità di un sistema reale (es. configurazioni, protocolli), con meno attenzione alle prestazioni.
+
+3-
+Diversi container vengono creati all'interno di una singola macchina host e connessi a domini di collisione virtuali per comunicare tra loro. Ogni container può essere configurato come un dispositivo che simula un host, un router, uno switch, ecc.
+4-
+Un container è un'unità standard di software che include il codice e tutte le sue dipendenze, garantendo che l'applicazione funzioni rapidamente e in modo affidabile in ambienti diversi. Docker è una piattaforma che permette di creare, distribuire e gestire questi container.
+
+
+5-
+Kathará è una piattaforma basata su Docker in cui ogni dispositivo di rete emulato è un container. Sono disponibili diverse immagini di container, tra cui:
+
+    Base: DNS, server web, utilità di rete.
+    Quagga e FRRouting: protocolli di routing standard (FRRouting include EVPN e MPLS).
+    Open vSwitch: switch con supporto OpenFlow.
+    Behavioral Model: implementazione software di uno switch P4.
+    
+    
+6-
+Ogni dispositivo emulato dispone di:
+
+    Una console (finestra del terminale).
+    Una memoria.
+    Un filesystem.
+    Interfacce di rete (zero, una o più).
+
+Ogni interfaccia di rete è collegata a un singolo dominio di collisione virtuale, che a sua volta può connettere più interfacce.
+
+
+
+----------------------------------------------
+teoria di PRATICA
+
+1-
+tipi di comandi su Kathara:
+
+◼ v-prefixed commands (v-commands)
+◼ l-prefixed commands (l-commands)
+◼ Global commands
+
+I v-commands sono strumenti a basso livello per configurare e avviare un singolo dispositivo.
+I l-commands offrono un ambiente semplificato per configurare laboratori complessi con più dispositivi.
+I global commands servono principalmente per la gestione generale.
+
+
+
+2-
+I v-commands consentono di avviare un singolo dispositivo con configurazioni arbitrarie (es. interfacce di rete).
+
+    vstart: avvia un nuovo dispositivo.
+    vconfig: collega interfacce di rete a un dispositivo in esecuzione.
+    vclean: interrompe un dispositivo.
+3-
+li l-commands semplificano la configurazione di laboratori complessi con più dispositivi:
+
+    lstart: avvia un laboratorio Kathará.
+    lclean: interrompe tutti i dispositivi di un laboratorio.
+    lconfig: gestisce un'interfaccia di rete di un dispositivo in un laboratorio in esecuzione.
+    lrestart: arresta e riavvia tutti i dispositivi di un laboratorio.
+    linfo: fornisce informazioni su un laboratorio.
+
+4-
+I comandi di gestione permettono il controllo dell'ambiente Kathará:
+
+    check: verifica l'ambiente di sistema.
+    connect: si collega a una macchina Kathará in esecuzione.
+    list: mostra tutte le macchine Kathará attive dell'utente corrente.
+    settings: visualizza e modifica le impostazioni di Kathará.
+    wipe: elimina tutte le macchine e i collegamenti Kathará, con l'opzione di rimuovere anche le impostazioni.
+    
+    
+ --------------------------------------------------------------------   
+pratica e serie di comandi 
+
+1-
+Verifica dell'ambiente:
+kathara check
+
+: Esegue test automatici per controllare che il sistema funzioni correttamente.
+
+Avvio di un dispositivo:
+kathara vstart -n pc1 --eth 0:A
+
+: Avvia un dispositivo chiamato pc1 collegato al dominio di collisione virtuale A.
+Si apre una finestra di terminale per eseguire comandi all'interno del dispositivo.
+
+Interruzione del dispositivo:
+kathara vclean -n pc1
+
+: Arresta il dispositivo pc1 precedentemente avviato.
+
+
+----------------------------------------------------------
+Struttura dei esercizi
+1-
+
+Un Kathará lab è un insieme di dispositivi preconfigurati che possono essere avviati e fermati insieme.
+
+La struttura base include:
+
+    lab.conf: definisce la topologia di rete.
+    Sottodirectory: contengono le configurazioni di ogni dispositivo.
+    File <device_name>.startup: specificano le azioni che i dispositivi eseguono
+    
+    
+    
+2-
+Struttura delle righe:
+machine[arg]=value:
+machine: nome del dispositivo (es. pc1).
+arg:
+Se arg è un numero: value rappresenta il dominio di collisione a cui collegare etharg.
+Se arg NON è un numero: è un'opzione, con value come argomento.
+
+3-
+Le interfacce devono essere definite in ordine (es. pc1[1]=A).
+Nomi di macchine e domini: solo [a-z] e [0-9].
+Maiuscole e minuscole sono equivalenti.
+
+
+4-
+Condivisione file tra host e dispositivi:
+
+File condivisi e sincronizzati:(Share files mirrored to the device)
+Le modifiche nel dispositivo si riflettono sull'host e viceversa.
+
+File copiati al dispositivo:
+ Due copie indipendenti, una sull'host e una sul dispositivo.
+ 
+ 
+5-
+Condivisione di file specchiati con il dispositivo
+
+La directory /shared all'interno di un dispositivo punta direttamente alla directory shared del laboratorio.
+Le modifiche apportate in una delle due directory si riflettono automaticamente nell'altra.
+Per impostazione predefinita, questa funzionalità è ATTIVA, ma può essere disabilitata tramite le impostazioni
+
+
+6-
+Condivisione di file copiati nel dispositivo
+
+Avviene tramite le sottodirectory del laboratorio.
+I contenuti della sottodirectory di un dispositivo vengono copiati nella root (/) del filesystem del dispositivo con lo stesso nome.
+Esempio: pc1/foo/file.txt nell'host diventa /foo/file.txt nel dispositivo pc1. Le copie sono indipendenti e non sincronizzate.
+
+
+
+7-
+File .startup: Funzione e Utilizzo
+Contengono script shell eseguiti automaticamente all'interno di un dispositivo subito dopo l'avvio.
+Utilizzo tipico: configurare interfacce di rete e/o avviare servizi di rete.
+    Esempio:
+
+ip address add 10.0.0.1/24 dev eth0
+
+Configura (ADD)
+l'indirizzo IP 10.0.0.1/24 
+sull'interfaccia eth0 del dispositivo. (DOVE)
+
+
+8-
+
+Avvio/Arresto di un laboratorio Kathará
+
+* Apri un terminale.
+*Accedi alla directory del laboratorio:
+   	cd lab_directory
+
+*Lancia un comando Kathará per gestire il laboratorio:
+Avviare il laboratorio:
+kathara lstart
+
+*Arrestare il laboratorio:
+kathara lclean
+
+*Riavviare il laboratorio:
+kathara lrestart

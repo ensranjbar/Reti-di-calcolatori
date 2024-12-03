@@ -1,0 +1,57 @@
+kathara pdf3 bridge
+1-
+Dispositivo come bridge: Configurazione
+
+ Obiettivo: Configurare il dispositivo b1 come un bridge di rete.
+ Bridge software: Linux dispone di un bridge software già disponibile, che verrà utilizzato.
+ Strumenti per la gestione del bridge:
+        ip link: Gestisce le interfacce di rete.
+        brctl: Configura e gestisce bridge di rete.
+        bridge: Comando avanzato per il controllo dei bridge.
+        ...: Altri strumenti disponibili per configurazioni specifiche.
+
+Nota: Il bridge consente di collegare più interfacce di rete, permettendo il passaggio trasparente dei pacchetti tra di esse.
+
+2- 
+how to create a bridge
+root@b1:~$ ip link add name mainbridge type bridge
+
+mainbridge-->  the internal name of the bridge  ->file di startup
+bridge-->the type of the newly created object
+
+***b1 is a name of the Kathará device
+***mainbridge is the name of a bridge inside b1
+
+
+3-
+connect interfaces to a bridge
+root@b1:~$ ip link set dev eth0 master mainbridge
+
+eth0-->the name of the interface to be connected
+mainbrige -->the name of the bridge to connect the interface
+
+
+4-
+bringing up the bridge
+root@b1:~$ ip link set up dev mainbridge
+up-->the desired state
+mainbridge-->the name of the bridge to be brought on
+
+
+5-
+bridge ageing time
+◼ the ageing time is the number of seconds that a MAC
+address will be kept in the FDB (Filtering Data Base)
+◼ by default, it is set to 300 (5 minutes)
+◼ to change the ageing time:
+root@b1:~$ brctl setageing mainbridge 600
+brctl-->utility to control bridges
+mainbridge-->name of the bridge
+600-->new ageing time,set in seconds
+---------------------------------------------------------
+tutto questo in b1.startup viene già impostata 
+---------------------------------------------------------
+
+6-
+show the FDB of a bridge
+root@b1:~$ brctl showmacs mainbridge

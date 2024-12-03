@@ -1,0 +1,52 @@
+- /shared:directory inside a device directly points to
+the shared directory inside the lab
+by default, it is ENABLED
+
+-The contents of subdirectory device are copied into the
+root (/) of the device named device filesystem
+
+- .startup files
+ip address add 10.0.0.1/24 dev eth0 
+
+-Launching/halting a lab
+
+--->cd lab_directory 
+
+ kathara lstart
+ kathara lclean
+ kathara lrestart
+ 
+ - pc1[0]="A" pc1 tramite interfaccia eth0 è collegato alla collisione di dominio A da un lato
+ 
+ - b1[0]="A" (dall'altro lato) b1 tramite interfaccia eth0 (potrebbe anche essere un'interfaccia diversa) è collegato alla collisione di dominio A
+ 
+ ..................................................................................................................................................
+ 
+ cd directory file
+ kathara lstart
+ scapy su devices
+ CREAZIONE DI UN PACCHETTO: p=Ether(dst='00:00:00:00:00:0B', src='00:00:00:00:00:0A')
+ SPEDIRE UN PACCHETTO: sendp(p, iface='eth0')
+ 
+DOMINIO DI COLLISIONE: kathara lconfig –n wireshark --add A
+
+***Controlla sempre prima di partire se wireshark è definito in lab.conf***
+
+wireshark[bridged]=true
+wireshark[port]="3000:3000"
+wireshark[image]="lscr.io/linuxserver/wireshark"
+wireshark[num_terms]=0
+
+***Per visualizzare un'altra interfaccia su wireshark***
+
+1)Stop capture packets
+2)Capture ---> Options 
+
+-------------------------------------------------------------------------
+
+pc1, pc2 ognuno di essi hanno una loro interfaccia e il loro dominio di collisione ha un'interfaccia che visualizziamo su wireshark 
+appena mandiamo un pacchetto, l'interfaccia del dominio di collisione viene visualizzato tra le interfacce
+
+---------------------------------------------------------------------
+show the FDB of a bridge: brctl showmacs mainbridge 
+
